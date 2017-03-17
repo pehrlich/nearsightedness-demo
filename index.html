@@ -82,8 +82,7 @@
 
 // Globals 
 var loader, camera, renderer, scene;
-var furnitureGroup, cursor;
-var pointerLockEnabled = false;
+var cursor;
 
 // furniture in the scene
 var modelInfo = [ 
@@ -92,7 +91,7 @@ var modelInfo = [
 { name: "vase_4",         position: [ 8.65, 0.15, 16 ],  scale: 2.25 },
 { name: "coffee_table_3", position: [ -6.2, 0, 0.8 ],    scale: 1.68 },
 { name: "chair_4",        position: [ -0.9, 0, 0 ],      scale: 1.2 },
-{ name: "sofa_2",         position: [ -0.5, 0, 0 ],      scale: 1.2 },
+{ name: "sofa_2",         position: [ -0.5, 0, 0 ],      scale: 1.2 }
 ];
 var modelsToLoad = modelInfo.length;
 
@@ -108,14 +107,16 @@ function main() {
 function loadModels() {	
 
 	loader = new THREE.OBJMTLLoader();
-	furnitureGroup = new THREE.Object3D();
+	var furnitureGroup = new THREE.Object3D();
 	furnitureGroup.name = "furnitureGroup";
 
 	for ( var i=0; i < modelInfo.length; i++ ) {
 
-		loadModel( modelInfo[ i ] );
+		loadModel( modelInfo[i], furnitureGroup );
 
 	}
+
+	cursor.addObject(furnitureGroup);
 
 }
 
@@ -128,7 +129,7 @@ function onLoadingDone() {
 }
 
 
-function loadModel( modelInfo ) {
+function loadModel( modelInfo, group ) {
 
 	var name = modelInfo.name;
 	var triple = modelInfo.position;
@@ -145,12 +146,12 @@ function loadModel( modelInfo ) {
 		object.scale.x = object.scale.y = object.scale.z = scale;
 		object.position.copy( position );
 		object.rotation.y = Math.PI;
-		furnitureGroup.add( object );
+		group.add( object );
 		modelsToLoad--;
 
 		if ( modelsToLoad === 0 ) {
 
-			scene.add( furnitureGroup )
+			scene.add( group );
 			onLoadingDone();
 
 		}
@@ -212,19 +213,17 @@ function initScene( ) {
 	ceiling.name = "ceiling";
 	scene.add ( ceiling );
 
-	// cursor
-	cursor = new THREE.Mesh(
-		new THREE.SphereGeometry( 0.2 ),
-		new THREE.MeshPhongMaterial( { color: "#FFFFFF" } )
-	);
-	cursor.name = "cursor";
-	scene.add( cursor );
-
+	// cursor:
+	cursor = new SphericalCursor(camera, scene);
 	// So cursor appears on top
 	floor.renderOrder = 0;
 	ceiling.renderOrder = 0;
-	cursor.renderOrder = 1;
-	cursor.material.depthTest = false;
+	cursor.mesh.renderOrder = 1;
+
+
+	var axisHelper = new THREE.AxisHelper( 5 );
+	axisHelper.position.set(-0.5,1,-1);
+	scene.add( axisHelper );
 
 }
 
@@ -309,6 +308,8 @@ function requestPointerLock() {
 
 			}
 
+			cursor.activate();
+
 		}, false );
 
 	} else {
@@ -332,7 +333,7 @@ function animate() {
 
 	window.requestAnimationFrame( animate );
 
-	SphericalCursor.update();
+	cursor.update();
 
 	renderer.render( scene, camera );
 
