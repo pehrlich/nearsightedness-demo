@@ -13,15 +13,20 @@ var SphericalCursor = function (camera, scene) {
   this.active = false;
   this.currentTarget = null;
 
-  this.mesh = new THREE.Mesh(
+  var mesh = new THREE.Mesh(
     new THREE.SphereGeometry(0.1, 16, 16),
     new THREE.MeshPhongMaterial({color: "#FFFFFF"})
   );
-  this.mesh.name = "cursor";
-  this.mesh.material.depthTest = false;
-  this.mesh.visible = true;
+  mesh.name = "cursor";
+  mesh.material.depthTest = false;
+  mesh.visible = true;
 
-  camera.add(this.mesh);
+  this.group = new THREE.Object3D();
+  this.group.add(mesh);
+
+  camera.add(this.group);
+  // this.group.add(camera);
+
 
   window.addEventListener("mousemove", this.onMouseMove.bind(this));
 };
@@ -37,11 +42,11 @@ SphericalCursor.prototype = {
   update: function () {
     if (!this.active) return;
 
-    this.mesh.position.copy(
+    this.group.position.copy(
       this.raycaster.ray.direction
     ).multiplyScalar(this.SPHERE_DISTANCE);
 
-    this.mesh.lookAt(this.raycaster.ray.direction);
+    this.group.lookAt(this.raycaster.ray.direction);
 
 
     var intersects = this.raycaster.intersectObjects(this.clickable_objects, true);

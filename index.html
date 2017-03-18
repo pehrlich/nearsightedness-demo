@@ -42,7 +42,6 @@ var modelInfo = [
 { name: "vase_4",         position: [ 8.65, 0.15, 16 ],  scale: 2.25 },
 { name: "coffee_table_3", position: [ -6.2, 0, 0.8 ],    scale: 1.68 },
 { name: "chair_4",        position: [ -0.9, 0, 0 ],      scale: 1.2  },
-//{ name: "chair_4",        position: [0, 0, 0 ],      scale: 1 }//,
 { name: "sofa_2",         position: [ -0.5, 0, 0 ],      scale: 1.2 }
 ];
 var modelsToLoad = modelInfo.length;
@@ -171,16 +170,16 @@ function initScene( ) {
 	ceiling.name = "ceiling";
 //	scene.add ( ceiling );
 
-	// cursor:
 	cursor = new SphericalCursor(camera, scene);
-	// So cursor appears on top
 	floor.renderOrder = 0;
 	ceiling.renderOrder = 0;
-	cursor.mesh.renderOrder = 1;
+	cursor.group.renderOrder = 1;
 
 	magnifier = new Magnifier(scene, renderer);
+	cursor.group.children[0].visible = false;
 
-	cursor.mesh.add(magnifier.mesh);
+	cursor.group.add(magnifier.mesh);
+
 
 	if (debugControls) controls = new THREE.OrbitControls(camera, renderer.domElement);
 
