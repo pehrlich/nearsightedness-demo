@@ -11,6 +11,7 @@ var SphericalCursor = function (camera, scene) {
   this.raycaster = new THREE.Raycaster();
   this.clickable_objects = [];
   this.active = false;
+  this.currentTarget = null;
 
   this.mesh = new THREE.Mesh(
     new THREE.SphereGeometry(0.2),
@@ -40,15 +41,24 @@ SphericalCursor.prototype = {
     ).multiplyScalar(this.SPHERE_RADIUS);
 
 
-    // console.log(this.mesh.position.toArray());
-    // var intersects = this.raycaster.intersectObjects(this.clickable_objects);
-    // if (intersects.length > 0) {
-    //   intersects[0].object.material.color.setHex(Math.random() * 0xffffff);
-    //   var particle = new THREE.Sprite(particleMaterial);
-    //   particle.position.copy(intersects[0].point);
-    //   particle.scale.x = particle.scale.y = 16;
-    //   scene.add(particle);
-    // }
+    var intersects = this.raycaster.intersectObjects(this.clickable_objects, true);
+
+    if (intersects.length > 0) {
+      if (this.currentTarget != intersects[0].object) {
+        if (this.currentTarget) this.currentTarget.material.emissive.setHex(this.currentTarget.currentHex);
+        this.currentTarget = intersects[0].object;
+        this.currentTarget.userData.origColor = this.currentTarget.material.emissive.getHex();
+        this.currentTarget.material.emissive.setHex(0xff0000);
+        // todo: emit mouseover
+      }
+    } else {
+      if (this.currentTarget) {
+        this.currentTarget.material.emissive.setHex(this.currentTarget.currentHex);
+        this.currentTarget = null;
+        // todo: emit mouseout
+      }
+      this.currentTarget = null;
+    }
 
   },
 
@@ -58,6 +68,10 @@ SphericalCursor.prototype = {
 
   activate: function () {
     this.active = true;
+  },
+
+  deactivate: function () {
+    this.active = false;
   }
 
 };
