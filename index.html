@@ -135,9 +135,7 @@ function onLoadingDone() {
 function loadModel(modelInfo, group) {
 
 	var name = modelInfo.name;
-	var triple = modelInfo.position;
-	var position = new THREE.Vector3(triple[0], triple[1], triple[2]);
-	var scale = modelInfo.scale;
+	var position = (new THREE.Vector3()).fromArray(modelInfo.position);
 
 	var dir = "./Assets/BigFurniturePack/Demo_scene/models/";
 	var filename = name + ".obj";
@@ -145,6 +143,7 @@ function loadModel(modelInfo, group) {
 
 	mtlLoader.setPath(dir);
 	objLoader.setPath(dir);
+
 	mtlLoader.load(filename + ".mtl", function (materials) {
 
 		materials.preload();
@@ -152,21 +151,10 @@ function loadModel(modelInfo, group) {
 		objLoader.setMaterials(materials);
 		objLoader.load(filename, function (object) {
 
-			var centroid = new THREE.Vector3(1.5, 0.5, 1);
-
 			object.name = name;
-			object.scale.x = object.scale.y = object.scale.z = scale;
+			object.scale.multiplyScalar(modelInfo.scale);
 			object.position.copy(position);
 			object.rotation.y = Math.PI;
-
-			// each model has children
-			// each child has a geometry
-			// each geo has .vertices, which is an array of Vec3s (hundreds)
-			// for each vertex multiply it by 1.1
-			// this should puff
-			// subtract centroid
-			// multiply
-			// add centroid again
 
 			group.add(object);
 			modelsToLoad--;
@@ -178,9 +166,7 @@ function loadModel(modelInfo, group) {
 
 		});
 
-
 	});
-
 
 }
 
