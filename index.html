@@ -7,7 +7,7 @@
 <html lang="en">
 <head>
 	<title>Threejs Cursor Project</title>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/84/three.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/84/three.js"></script>
 	<script src="https://threejs.org/examples/js/loaders/MTLLoader.js"></script>
 	<script src="https://threejs.org/examples/js/loaders/OBJLoader.js"> </script>
 	<script src="https://threejs.org/examples/js/controls/OrbitControls.js"></script>
@@ -235,7 +235,7 @@ function initScene( ) {
 	);
 	ceiling.position.y = 3.5;
 	ceiling.name = "ceiling";
-	scene.add ( ceiling );
+//	scene.add ( ceiling );
 
 	// cursor:
 	cursor = new SphericalCursor(camera, scene);
@@ -245,9 +245,8 @@ function initScene( ) {
 	cursor.mesh.renderOrder = 1;
 
 
-	var axisHelper = new THREE.AxisHelper( 5 );
-	axisHelper.position.set(-0.5,1,-1);
-	scene.add( axisHelper );
+	controls = new THREE.OrbitControls(camera, renderer.domElement);
+
 
 }
 
@@ -328,7 +327,7 @@ function requestPointerLock() {
 
 			} else {
 
-				element.requestPointerLock();
+//				element.requestPointerLock();
 
 			}
 
@@ -357,7 +356,9 @@ function animate() {
 
 	window.requestAnimationFrame( animate );
 
-	cursor.update();
+
+	controls.update();
+//	cursor.update();
 
 	renderer.render( scene, camera );
 
