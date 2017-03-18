@@ -7,9 +7,10 @@
 <html lang="en">
 <head>
 	<title>Threejs Cursor Project</title>
-	<script src="libs/three.js"> </script>
-	<script src="libs/MTLLoader.js"> </script>
-	<script src="libs/OBJMTLLoader.js"> </script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/84/three.min.js"></script>
+	<script src="https://threejs.org/examples/js/loaders/MTLLoader.js"></script>
+	<script src="https://threejs.org/examples/js/loaders/OBJLoader.js"> </script>
+	<script src="https://threejs.org/examples/js/controls/OrbitControls.js"></script>
 	<script src="SphericalCursor.js"> </script>
 	<style>
 
@@ -81,8 +82,8 @@
 <script>
 
 // Globals 
-var loader, camera, renderer, scene;
-var cursor;
+var mtlLoader, camera, renderer, scene, objLoader = new THREE.OBJLoader;
+var cursor, controls;
 
 // furniture in the scene
 var modelInfo = [ 
@@ -104,9 +105,11 @@ function main() {
 }
 
 
-function loadModels() {	
+function loadModels() {
 
-	loader = new THREE.OBJMTLLoader();
+
+
+	mtlLoader = new THREE.MTLLoader();
 	var furnitureGroup = new THREE.Object3D();
 	furnitureGroup.name = "furnitureGroup";
 
@@ -129,34 +132,55 @@ function onLoadingDone() {
 }
 
 
-function loadModel( modelInfo, group ) {
+function loadModel(modelInfo, group) {
 
 	var name = modelInfo.name;
 	var triple = modelInfo.position;
-	var position = new THREE.Vector3( triple[0], triple[1], triple[2] );
+	var position = new THREE.Vector3(triple[0], triple[1], triple[2]);
 	var scale = modelInfo.scale;
 
-	var dir = "./Assets/BigFurniturePack/Demo_scene/models"
-	var filename = dir + "/" + name + ".obj";
+	var dir = "./Assets/BigFurniturePack/Demo_scene/models/";
+	var filename = name + ".obj";
 	console.log("Loading " + filename);
 
-	loader.load(filename, filename + ".mtl", function( object ) {
+	mtlLoader.setPath(dir);
+	objLoader.setPath(dir);
+	mtlLoader.load(filename + ".mtl", function (materials) {
 
-		object.name = name;
-		object.scale.x = object.scale.y = object.scale.z = scale;
-		object.position.copy( position );
-		object.rotation.y = Math.PI;
-		group.add( object );
-		modelsToLoad--;
+		materials.preload();
 
-		if ( modelsToLoad === 0 ) {
+		objLoader.setMaterials(materials);
+		objLoader.load(filename, function (object) {
 
-			scene.add( group );
-			onLoadingDone();
+			var centroid = new THREE.Vector3(1.5, 0.5, 1);
 
-		}
+			object.name = name;
+			object.scale.x = object.scale.y = object.scale.z = scale;
+			object.position.copy(position);
+			object.rotation.y = Math.PI;
+
+			// each model has children
+			// each child has a geometry
+			// each geo has .vertices, which is an array of Vec3s (hundreds)
+			// for each vertex multiply it by 1.1
+			// this should puff
+			// subtract centroid
+			// multiply
+			// add centroid again
+
+			group.add(object);
+			modelsToLoad--;
+
+			if (modelsToLoad === 0) {
+				scene.add(group);
+				onLoadingDone();
+			}
+
+		});
+
 
 	});
+
 
 }
 
