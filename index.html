@@ -32,7 +32,7 @@
 
   // Globals
   var mtlLoader, camera, renderer, scene, objLoader = new THREE.OBJLoader;
-  var cursor, controls, magnifier;
+  var cursor, controls, magnifier, textCtrl;
 
   var debugControls = true;
 
@@ -180,30 +180,7 @@
 
     cursor.group.add(magnifier.mesh);
 
-    var floatingText = new FloatingText(
-        camera,
-        scene,
-        [
-          {
-            string: "My dear, let us hope it is not true; but, if it is true, ",
-            cameraPos: ['center', 1.03, -3]
-          },
-          {
-            string: "let us hope it will not become generally known.",
-            cameraPos: ['center', 0.9, -3]
-          },
-          {
-            string: "--Charles Darwin's friend, the wife ",
-            cameraPos: [0, 0.77, -3],
-            geometryOptions: {size: 0.05, height: 0.03}
-          },
-          {
-            string: "  of the Bishop of Birmingham, 1880s.",
-            cameraPos: [0, 0.67, -3],
-            geometryOptions: {size: 0.05, height: 0.03}
-          }
-        ]
-    );
+    textCtrl = new TextCtrl(camera, scene);
 
 
     if (debugControls) controls = new THREE.OrbitControls(camera, renderer.domElement);
@@ -313,10 +290,7 @@
 
   }
 
-  function animate() {
-
-    window.requestAnimationFrame(animate);
-
+  function animate(timestamp) {
 
     if (debugControls) {
       controls.update();
@@ -325,7 +299,11 @@
     }
 
     magnifier.update();
+    if (timestamp) textCtrl.update(timestamp);
     renderer.render(scene, camera);
+
+    // moved to bottom to allow frame dropping
+    window.requestAnimationFrame(animate);
 
   }
 
