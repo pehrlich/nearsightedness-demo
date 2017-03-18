@@ -83,7 +83,12 @@
 
 // Globals 
 var mtlLoader, camera, renderer, scene, objLoader = new THREE.OBJLoader;
-var cursor, controls;
+var cursor, controls, magnifier;
+
+var debugControls = true;
+
+// RTT
+var rtTexture, cameraRTT;
 
 // furniture in the scene
 var modelInfo = [ 
@@ -106,8 +111,6 @@ function main() {
 
 
 function loadModels() {
-
-
 
 	mtlLoader = new THREE.MTLLoader();
 	var furnitureGroup = new THREE.Object3D();
@@ -180,8 +183,7 @@ function initScene( ) {
 	// camera
 	var aspect = window.innerWidth / window.innerHeight;
 	camera = new THREE.PerspectiveCamera( 45, aspect, 1, 1000 );
-	camera.position.y = 1.8; // player height
-	camera.position.z = 5.0;
+	camera.position.set(0,1.8,5.0);
 	camera.name = "camera";
 	scene.add( camera );
 
@@ -231,7 +233,27 @@ function initScene( ) {
 	cursor.mesh.renderOrder = 1;
 
 
-	controls = new THREE.OrbitControls(camera, renderer.domElement);
+	cameraRTT = new THREE.PerspectiveCamera( 45, aspect, 1, 1000 );
+	cameraRTT.position.set(0,1.8,5.0);
+	cameraRTT.name = "cameraRTT";
+	scene.add( cameraRTT );
+
+
+	rtTexture = new THREE.WebGLRenderTarget(
+			256, 256, {
+				minFilter: THREE.LinearFilter,
+				magFilter: THREE.NearestFilter,
+				format: THREE.RGBFormat
+			} );
+
+	var planeMaterial = new THREE.MeshBasicMaterial({ map: rtTexture });
+
+
+	var magnifier = new THREE.Mesh( new THREE.PlaneGeometry(1,1), planeMaterial);
+	magnifier.position.set(0,1,0);
+	scene.add(magnifier);
+
+	if (debugControls) controls = new THREE.OrbitControls(camera, renderer.domElement);
 
 
 }
@@ -242,6 +264,7 @@ function requestPointerLock() {
 	// http://www.html5rocks.com/en/tutorials/pointerlock/intro/
 
 	var blocker = document.getElementById( 'blocker' );
+	if (debugControls) blocker.style.display = 'none';
 	var instructions = document.getElementById( 'instructions' );
 
 	var havePointerLock = 'pointerLockElement' in document || 'mozPointerLockElement' in document || 'webkitPointerLockElement' in document;
@@ -313,7 +336,7 @@ function requestPointerLock() {
 
 			} else {
 
-//				element.requestPointerLock();
+				if (!debugControls) element.requestPointerLock();
 
 			}
 
@@ -343,10 +366,14 @@ function animate() {
 	window.requestAnimationFrame( animate );
 
 
-	controls.update();
-//	cursor.update();
+	if (debugControls){
+		controls.update();
+	}else {
+		cursor.update();
+	}
 
-	renderer.render( scene, camera );
+	renderer.render(scene, cameraRTT, rtTexture, true);
+  renderer.render(scene, camera);
 
 }
 
