@@ -85,7 +85,7 @@
 var mtlLoader, camera, renderer, scene, objLoader = new THREE.OBJLoader;
 var cursor, controls, magnifier;
 
-var debugControls = true;
+var debugControls = false;
 
 // RTT
 var rtTexture, cameraRTT;
@@ -96,7 +96,8 @@ var modelInfo = [
 { name: "vase_1",         position: [ 12.9, 0.4, 12.5 ], scale: 2.25 },
 { name: "vase_4",         position: [ 8.65, 0.15, 16 ],  scale: 2.25 },
 { name: "coffee_table_3", position: [ -6.2, 0, 0.8 ],    scale: 1.68 },
-{ name: "chair_4",        position: [ -0.9, 0, 0 ],      scale: 1.2 },
+{ name: "chair_4",        position: [ -0.9, 0, 0 ],      scale: 1.2  },
+//{ name: "chair_4",        position: [0, 0, 0 ],      scale: 1 }//,
 { name: "sofa_2",         position: [ -0.5, 0, 0 ],      scale: 1.2 }
 ];
 var modelsToLoad = modelInfo.length;
@@ -233,11 +234,6 @@ function initScene( ) {
 	cursor.mesh.renderOrder = 1;
 
 
-	cameraRTT = new THREE.PerspectiveCamera( 45, aspect, 1, 1000 );
-	cameraRTT.position.set(0,1.8,5.0);
-	cameraRTT.name = "cameraRTT";
-	scene.add( cameraRTT );
-
 
 	rtTexture = new THREE.WebGLRenderTarget(
 			256, 256, {
@@ -250,8 +246,20 @@ function initScene( ) {
 
 
 	var magnifier = new THREE.Mesh( new THREE.PlaneGeometry(1,1), planeMaterial);
-	magnifier.position.set(0,1,0);
-	scene.add(magnifier);
+	magnifier.position.set(0,0,0);
+
+	cameraRTT = new THREE.PerspectiveCamera( 45, aspect, 1, 1000 );
+	cameraRTT.position.set(0,1.8,5.0);
+	cameraRTT.name = "cameraRTT";
+	cameraRTT.zoom = 3;
+	cameraRTT.updateProjectionMatrix();
+	magnifier.add( cameraRTT );
+
+	magnifier.visible = true;
+
+
+	cursor.mesh.add(magnifier);
+
 
 	if (debugControls) controls = new THREE.OrbitControls(camera, renderer.domElement);
 

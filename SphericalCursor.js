@@ -6,7 +6,7 @@ var SphericalCursor = function (camera, scene) {
   this.DISTANCE_SCALE_FACTOR = -0.05;  // to scale down the cursor based on its collision distance
   this.DEFAULT_CURSOR_SCALE = 0.6;     // scale to set the cursor if no raycast hit is found
   this.MAX_DISTANCE = 100;             // maximum distance to raycast
-  this.SPHERE_RADIUS = 20;           // sphere radius to project cursor onto if no raycast hit
+  this.SPHERE_DISTANCE = 2;           // sphere radius to project cursor onto if no raycast hit
   this.mouse = new THREE.Vector2();
   this.raycaster = new THREE.Raycaster();
   this.clickable_objects = [];
@@ -14,11 +14,12 @@ var SphericalCursor = function (camera, scene) {
   this.currentTarget = null;
 
   this.mesh = new THREE.Mesh(
-    new THREE.SphereGeometry(0.2),
+    new THREE.SphereGeometry(0.1, 16, 16),
     new THREE.MeshPhongMaterial({color: "#FFFFFF"})
   );
   this.mesh.name = "cursor";
   this.mesh.material.depthTest = false;
+  this.mesh.visible = true;
 
   camera.add(this.mesh);
 
@@ -37,8 +38,10 @@ SphericalCursor.prototype = {
     if (!this.active) return;
 
     this.mesh.position.copy(
-      this.raycaster.ray.direction.normalize()
-    ).multiplyScalar(this.SPHERE_RADIUS);
+      this.raycaster.ray.direction
+    ).multiplyScalar(this.SPHERE_DISTANCE);
+
+    this.mesh.lookAt(this.raycaster.ray.direction);
 
 
     var intersects = this.raycaster.intersectObjects(this.clickable_objects, true);
