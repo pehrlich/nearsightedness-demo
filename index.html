@@ -6,67 +6,15 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+	<meta charset="utf-8">
 	<title>Threejs Cursor Project</title>
+	<link href="css/style.css" rel="stylesheet" />
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/84/three.js"></script>
 	<script src="https://threejs.org/examples/js/loaders/MTLLoader.js"></script>
 	<script src="https://threejs.org/examples/js/loaders/OBJLoader.js"> </script>
 	<script src="https://threejs.org/examples/js/controls/OrbitControls.js"></script>
-	<script src="SphericalCursor.js"> </script>
-	<style>
-
-		html, body {
-			width: 100%;
-			height: 100%;
-		}
-
-		body {
-			background-color: #ffffff;
-			margin: 0;
-			overflow: hidden;
-			font-family: arial;
-		}
-
-		#blocker {
-
-			position: absolute;
-
-			width: 100%;
-			height: 100%;
-
-			background-color: rgba(0,0,0,0.5);
-
-		}
-
-		#instructions {
-
-			width: 100%;
-			height: 100%;
-
-			display: -webkit-box;
-			display: -moz-box;
-			display: box;
-
-			-webkit-box-orient: horizontal;
-			-moz-box-orient: horizontal;
-			box-orient: horizontal;
-
-			-webkit-box-pack: center;
-			-moz-box-pack: center;
-			box-pack: center;
-
-			-webkit-box-align: center;
-			-moz-box-align: center;
-			box-align: center;
-
-			color: #ffffff;
-			text-align: center;
-
-			cursor: pointer;
-
-		}
-	
-
-	</style>
+	<script src="js/SphericalCursor.js"> </script>
+	<script src="js/Magnifier.js"> </script>
 </head>
 <body>
 	<div id="blocker">
@@ -86,9 +34,6 @@ var mtlLoader, camera, renderer, scene, objLoader = new THREE.OBJLoader;
 var cursor, controls, magnifier;
 
 var debugControls = false;
-
-// RTT
-var rtTexture, cameraRTT;
 
 // furniture in the scene
 var modelInfo = [ 
@@ -189,7 +134,7 @@ function initScene( ) {
 	scene.add( camera );
 
 	// render
-	renderer = new THREE.WebGLRenderer();
+	renderer = new THREE.WebGLRenderer( {antialias: true} );
 	renderer.setSize( window.innerWidth, window.innerHeight );
 	document.body.appendChild( renderer.domElement );
 
@@ -233,33 +178,9 @@ function initScene( ) {
 	ceiling.renderOrder = 0;
 	cursor.mesh.renderOrder = 1;
 
+	magnifier = new Magnifier(scene, renderer);
 
-
-	rtTexture = new THREE.WebGLRenderTarget(
-			256, 256, {
-				minFilter: THREE.LinearFilter,
-				magFilter: THREE.NearestFilter,
-				format: THREE.RGBFormat
-			} );
-
-	var planeMaterial = new THREE.MeshBasicMaterial({ map: rtTexture });
-
-
-	var magnifier = new THREE.Mesh( new THREE.PlaneGeometry(1,1), planeMaterial);
-	magnifier.position.set(0,0,0);
-
-	cameraRTT = new THREE.PerspectiveCamera( 45, aspect, 1, 1000 );
-	cameraRTT.position.set(0,1.8,5.0);
-	cameraRTT.name = "cameraRTT";
-	cameraRTT.zoom = 3;
-	cameraRTT.updateProjectionMatrix();
-	magnifier.add( cameraRTT );
-
-	magnifier.visible = true;
-
-
-	cursor.mesh.add(magnifier);
-
+	cursor.mesh.add(magnifier.mesh);
 
 	if (debugControls) controls = new THREE.OrbitControls(camera, renderer.domElement);
 
@@ -380,7 +301,7 @@ function animate() {
 		cursor.update();
 	}
 
-	renderer.render(scene, cameraRTT, rtTexture, true);
+	magnifier.update();
   renderer.render(scene, camera);
 
 }
