@@ -34,6 +34,7 @@ GrabCtrl.prototype = {
   onMagClick: function (event) {
     this.magGrabbed = true;
     this.cursor.group.children[0].visible = false;
+    this.cursor.SENSITIVITY = 0.003;
 
     THREE.SceneUtils.detach(this.magnifier.mesh, this.scene, this.cursor.group);
     this.magnifier.mesh.position.set(0, 0, 0);
