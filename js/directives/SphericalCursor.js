@@ -14,6 +14,13 @@ var SphericalCursor = function (camera, scene) {
   this.currentTarget = null;
   this._hoveredElements = [];
 
+  // If there is no collision, the cursor geometry will scaled to the DEFAULT_CURSOR_SCALE and positioned on the surface of a large virtual sphere of radius SPHERE_RADIUS surrounding the player.
+  // If there is a collision, the cursor geometry should be positioned at the hit point and scaled uniformly based upon the distance to the hit, using the equation:
+  // (distanceToObject * DISTANCE_SCALE_FACTOR + 1.0f) / 2.0f
+  // distanceToObject: Distance to the hit point
+  // DISTANCE_SCALE_FACTOR: Tuning factor, default value is provided
+  this.autoScale = true;
+
   var mesh = new THREE.Mesh(
     new THREE.SphereGeometry(0.05, 16, 16),
     new THREE.MeshPhongMaterial({
@@ -78,11 +85,16 @@ SphericalCursor.prototype = {
     }
 
     var sphere_distance = this.SPHERE_DISTANCE;
-    if (this.currentTarget) sphere_distance = this.currentTarget.distance;
+    if (this.autoScale && this.currentTarget) sphere_distance = this.currentTarget.distance;
 
     this.group.position.copy(
       this.raycaster.ray.direction
     ).multiplyScalar(sphere_distance);
+
+
+
+    this.group.scale.set(1,1,1);
+    if (this.autoScale) this.group.scale.multiplyScalar((sphere_distance * this.DISTANCE_SCALE_FACTOR + 1.0) / 2.0);
 
     this.group.lookAt(this.raycaster.ray.direction);
 
