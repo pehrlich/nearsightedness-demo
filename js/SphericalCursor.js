@@ -26,7 +26,6 @@ var SphericalCursor = function (camera, scene) {
 
   camera.add(this.group);
 
-
   window.addEventListener("mousemove", this.onMouseMove.bind(this));
 };
 

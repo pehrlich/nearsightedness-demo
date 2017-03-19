@@ -12,11 +12,19 @@ function TextCtrl(camera, scene, font) {
   this.animations = [];
 
   this.font = font;
+  this._hoveredElements = [];
   this.createMeshes();
+
+  window.addEventListener("click", this.onClick.bind(this));
 
 }
 
 TextCtrl.prototype = {
+  onClick: function () {
+    this._hoveredElements.map(function (mesh) {
+      mesh.dispatchEvent({type: 'click' })
+    });
+  },
   createMeshes: function () {
     this.segments = [
       {
@@ -40,14 +48,27 @@ TextCtrl.prototype = {
       // }
     ];
 
+    var hoveredElements = this._hoveredElements;
+
     var onTextMouseOver = function (event) {
       this.userData.origColor0 = this.material.materials[0].color.getHex();
       this.userData.origColor1 = this.material.materials[1].color.getHex();
       this.material.materials[0].color.setHex(0xf4f442);
+      hoveredElements.push(this);
     };
 
     var onTextMouseOut = function (event) {
       this.material.materials[0].color.setHex(this.userData.origColor0);
+      for (var i = 0; i < hoveredElements.length; i++){
+        if (hoveredElements[i] == this) {
+          hoveredElements.splice(i,1)
+          return
+        }
+      }
+    };
+
+    var onTextClick = function (event) {
+      console.log('text lick', event);
     };
 
 
@@ -81,6 +102,7 @@ TextCtrl.prototype = {
       segment.mesh = new THREE.Mesh(geometry, material);
       segment.mesh.addEventListener('mouseover', onTextMouseOver);
       segment.mesh.addEventListener('mouseout', onTextMouseOut);
+      segment.mesh.addEventListener('click', onTextClick);
 
       if (segment.startPos) {
         segment.mesh.position.fromArray(segment.startPos);
