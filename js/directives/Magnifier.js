@@ -3,7 +3,7 @@ function Magnifier(scene, renderer) {
   this.scene = scene;
   this.renderer = renderer;
   var magInnerRadius = 0.3;
-  var magColor = 0xcccc00;
+  var magColor = 0xdddd11;
 
   this.texture = new THREE.WebGLRenderTarget(
     256, 256, {
@@ -20,7 +20,7 @@ function Magnifier(scene, renderer) {
 
   var magMaterial = new THREE.MeshPhongMaterial({
     color: magColor,
-    emissive: 0x999933,
+    emissive: 0x333300,
     side: THREE.DoubleSide,
     shading: THREE.FlatShading
   });

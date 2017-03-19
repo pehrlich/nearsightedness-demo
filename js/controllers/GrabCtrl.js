@@ -10,7 +10,7 @@ function GrabCtrl(cursor, scene, camera, renderer) {
   this.magGrabbed = false;
   this.magnifier = new Magnifier(scene, renderer);
   this.magnifier.mesh.position.set(0.7, 1.5, 2.3);
-  this.magnifier.mesh.rotation.z = - Math.PI / 4;
+  this.magnifier.mesh.rotation.z = -Math.PI / 4;
   this.magnifier.mesh.addEventListener('click', this.onMagClick.bind(this));
   this.magnifier.mesh.addEventListener('mouseover', this.onMagMouseOver.bind(this));
   this.magnifier.mesh.addEventListener('mouseout', this.onMagMouseOut.bind(this));
@@ -21,22 +21,23 @@ function GrabCtrl(cursor, scene, camera, renderer) {
 GrabCtrl.prototype = {
 
   onMagMouseOver: function () {
-    console.log('mouse over mag');
+    var mesh = this.magnifier.mesh.getObjectByName( "mag ring" );
+    if ( mesh.userData.origEmissive === undefined) mesh.userData.origEmissive = mesh.material.emissive.getHex();
+    mesh.material.emissive.setHex(0x999933);
   },
 
   onMagMouseOut: function () {
-    console.log('mouse out mag');
+    var mesh = this.magnifier.mesh.getObjectByName( "mag ring" );
+    mesh.material.emissive.setHex(mesh.userData.origEmissive);
   },
 
   onMagClick: function (event) {
-    console.log('mag click');
-    // debugger
     this.magGrabbed = true;
     this.cursor.group.children[0].visible = false;
 
     THREE.SceneUtils.detach(this.magnifier.mesh, this.scene, this.cursor.group);
-    this.magnifier.mesh.position.set(0,0,0);
-    this.magnifier.mesh.rotation.set(0,0,0);
+    this.magnifier.mesh.position.set(0, 0, 0);
+    this.magnifier.mesh.rotation.set(0, 0, 0);
 
     this.cursor.removeObject(this.magnifier.mesh);
     event.stopPropagation = true;
