@@ -73,9 +73,9 @@ TextCtrl.prototype = {
       ctrl.camera.updateMatrixWorld(true);
       finalPosition.applyMatrix4(ctrl.camera.matrixWorld);
 
-      ctrl.animate(0, finalPosition).then(function (segment) {
-        THREE.SceneUtils.detach(segment.mesh, this.scene, this.camera);
-        segment.mesh.position.fromArray(segment.cameraPos);
+      ctrl.animate(segment.mesh, finalPosition).then(function (mesh) {
+        THREE.SceneUtils.detach(mesh, this.scene, this.camera);
+        mesh.position.fromArray(mesh.userData.segment.cameraPos);
       });
     };
 
@@ -139,12 +139,12 @@ TextCtrl.prototype = {
   },
 
   // fixed duration of 1s
-  animate: function (index, endPos) {
+  animate: function (mesh, endPos) {
     var o = {
       startTime: performance.now(),
       endTime: performance.now() + 1000,
-      target: this._segments[index],
-      startPos: this._segments[index].mesh.position.clone(),
+      target: mesh,
+      startPos: mesh.position.clone(),
       endPos: endPos,
       resolve: null,
       reject: null
@@ -172,7 +172,7 @@ TextCtrl.prototype = {
         i--;
         animation.resolve(animation.target);
       } else {
-        animation.target.mesh.position.set(0, 0, 0)
+        animation.target.position.set(0, 0, 0)
           .add(animation.endPos).sub(animation.startPos).multiplyScalar(t)
           .add(animation.startPos);
       }

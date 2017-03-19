@@ -52,7 +52,6 @@ SphericalCursor.prototype = {
 
     if (intersects.length > 0) {
       if (target != intersects[0].object) {
-        if (target) target.material.emissive.setHex(target.currentHex);
         this.currentTarget = target = intersects[0].object;
         target.dispatchEvent({type: 'mouseover', message: 'ok over'});
       }
