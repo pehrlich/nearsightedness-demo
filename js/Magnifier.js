@@ -29,6 +29,35 @@ function Magnifier(scene, renderer) {
   cylinder.rotation.z = Math.PI / 4;
   this.mesh.add( cylinder );
 
+  var crossHair = new THREE.Object3D();
+
+  var crossHairMaterial = new THREE.MeshBasicMaterial(
+    { color: 0xbbbbbb }
+  );
+  var crossHairGeom = new THREE.PlaneBufferGeometry(0.008, 0.09);
+
+  var topCrosshair = new THREE.Mesh(crossHairGeom, crossHairMaterial);
+  topCrosshair.position.set(0, 0.1, 0.01);
+  crossHair.add(topCrosshair);
+
+  var bottomCrosshair = new THREE.Mesh(crossHairGeom, crossHairMaterial);
+  bottomCrosshair.position.set(0, -0.1, 0.01);
+  crossHair.add(bottomCrosshair);
+
+  var leftCrosshair = new THREE.Mesh(crossHairGeom, crossHairMaterial);
+  leftCrosshair.position.set(0.1, 0, 0.01);
+  leftCrosshair.rotation.z = Math.PI / 2;
+  crossHair.add(leftCrosshair);
+
+  var rightCrosshair = new THREE.Mesh(crossHairGeom, crossHairMaterial);
+  rightCrosshair.position.set(-0.1, 0, 0.01);
+  rightCrosshair.rotation.z = Math.PI / 2;
+  crossHair.add(rightCrosshair);
+
+
+  this.mesh.add(crossHair);
+
+
 
   this.camera = new THREE.PerspectiveCamera( 45, 1, 1, 1000 );
   this.camera.position.set(0,0,0);
