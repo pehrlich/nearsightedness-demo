@@ -1,29 +1,41 @@
-<!--
-	Shim for Spherical Cursor Project
-	Based on Three.js Pointer Lock Controls
-	http://threejs.org/examples/misc_controls_pointerlock.html
--->
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>Threejs Cursor Project</title>
+  <title>Nearsightedness</title>
   <link href="css/style.css" rel="stylesheet"/>
+
+  <link href="https://fonts.googleapis.com/css?family=Architects+Daughter|Special+Elite" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/84/three.js"></script>
   <script src="https://threejs.org/examples/js/loaders/MTLLoader.js"></script>
   <script src="https://threejs.org/examples/js/loaders/OBJLoader.js"></script>
   <script src="https://threejs.org/examples/js/controls/OrbitControls.js"></script>
-  <script src="js/SphericalCursor.js"></script>
-  <script src="js/Magnifier.js"></script>
-  <script src="js/FloatingText.js"></script>
+
+
+  <script src="https://threejs.org/examples/js/shaders/CopyShader.js"></script>
+  <script src="https://threejs.org/examples/js/shaders/BokehShader.js"></script>
+
+  <script src="https://threejs.org/examples/js/postprocessing/EffectComposer.js"></script>
+  <script src="https://threejs.org/examples/js/postprocessing/RenderPass.js"></script>
+  <script src="https://threejs.org/examples/js/postprocessing/ShaderPass.js"></script>
+  <script src="https://threejs.org/examples/js/postprocessing/MaskPass.js"></script>
+  <script src="https://threejs.org/examples/js/postprocessing/BokehPass.js"></script>
+
+  <script src="js/directives/PointerLock.js"></script>
+  <script src="js/directives/SphericalCursor.js"></script>
+  <script src="js/directives/Magnifier.js"></script>
+  <script src="js/controllers/FloatingText.js"></script>
+  <script src="js/controllers/GrabCtrl.js"></script>
 </head>
 <body>
 <div id="blocker">
 
   <div id="instructions">
-    <span style="font-size:40px">Click to begin</span>
-    <br/>
-    ( ESC to exit )
+    <h1 style="">Nearsightedness</h1>
+    <h2>Click to begin</h2>
+    <p>
+      ( ESC to exit )
+    </p>
   </div>
 
 </div>
@@ -32,9 +44,10 @@
 
   // Globals
   var mtlLoader, camera, renderer, scene, objLoader = new THREE.OBJLoader;
-  var cursor, controls, magnifier, textCtrl;
+  var cursor, controls, magnifier, textCtrl, postprocessing = {}, grabCtrl;
 
-  var debugControls = true;
+  var debugControls = false;
+//  var debugControls = true;
 
   // furniture in the scene
   var modelInfo = [
@@ -51,6 +64,7 @@
 
     requestPointerLock();
     initScene();
+    initPostprocessing();
     loadModels();
 
     (new THREE.FontLoader())
@@ -58,6 +72,9 @@
           textCtrl = new TextCtrl(camera, scene, font);
           textCtrl.meshes().map(function (mesh) { cursor.addObject(mesh); });
     });
+
+    grabCtrl = new GrabCtrl(cursor, scene, camera, renderer);
+    cursor.addObject(grabCtrl.magnifier.mesh);
 
   }
 
@@ -73,8 +90,6 @@
       loadModel(modelInfo[i], furnitureGroup);
 
     }
-
-//    cursor.addObject(furnitureGroup);
 
   }
 
@@ -177,113 +192,40 @@
     //	scene.add ( ceiling );
 
     cursor = new SphericalCursor(camera, scene);
-    floor.renderOrder = 0;
-    ceiling.renderOrder = 0;
-    cursor.group.renderOrder = 1;
-
-    magnifier = new Magnifier(scene, renderer);
-    cursor.group.children[0].visible = false;
-
-    cursor.group.add(magnifier.mesh);
-
+    // todo
+//    floor.renderOrder = 0;
+//    ceiling.renderOrder = 0;
+//    cursor.group.renderOrder = 1;
 
     if (debugControls) controls = new THREE.OrbitControls(camera, renderer.domElement);
 
   }
 
 
-  function requestPointerLock() {
+  // from
+  function initPostprocessing() {
+			var renderPass = new THREE.RenderPass( scene, camera );
 
-    // http://www.html5rocks.com/en/tutorials/pointerlock/intro/
+			var bokehPass = new THREE.BokehPass( scene, camera, {
+				focus: 		0.5,
+				aperture:	0.025,
+				maxblur:	2.0,
 
-    var blocker = document.getElementById('blocker');
-    if (debugControls) blocker.style.display = 'none';
-    var instructions = document.getElementById('instructions');
+				width: window.innerWidth,
+				height: window.innerHeight
+			} );
 
-    var havePointerLock = 'pointerLockElement' in document || 'mozPointerLockElement' in document || 'webkitPointerLockElement' in document;
+			bokehPass.renderToScreen = true;
 
-    if (havePointerLock) {
+			var composer = new THREE.EffectComposer( renderer );
 
-      var element = document.body;
+			composer.addPass( renderPass );
+			composer.addPass( bokehPass );
 
-      var pointerlockchange = function (event) {
+			postprocessing.composer = composer;
+			postprocessing.bokeh = bokehPass;
 
-        if (document.pointerLockElement === element || document.mozPointerLockElement === element || document.webkitPointerLockElement === element) {
-
-          blocker.style.display = 'none';
-
-        } else {
-
-          blocker.style.display = '-webkit-box';
-          blocker.style.display = '-moz-box';
-          blocker.style.display = 'box';
-
-          instructions.style.display = '';
-
-        }
-
-      }
-
-      var pointerlockerror = function (event) {
-
-        instructions.style.display = '';
-
-      }
-
-      // Hook pointer lock state change events
-      document.addEventListener('pointerlockchange', pointerlockchange, false);
-      document.addEventListener('mozpointerlockchange', pointerlockchange, false);
-      document.addEventListener('webkitpointerlockchange', pointerlockchange, false);
-
-      document.addEventListener('pointerlockerror', pointerlockerror, false);
-      document.addEventListener('mozpointerlockerror', pointerlockerror, false);
-      document.addEventListener('webkitpointerlockerror', pointerlockerror, false);
-
-      instructions.addEventListener('click', function (event) {
-
-        instructions.style.display = 'none';
-
-        // Ask the browser to lock the pointer
-        element.requestPointerLock = element.requestPointerLock || element.mozRequestPointerLock || element.webkitRequestPointerLock;
-
-        if (/Firefox/i.test(navigator.userAgent)) {
-
-          var fullscreenchange = function (event) {
-
-            if (document.fullscreenElement === element || document.mozFullscreenElement === element || document.mozFullScreenElement === element) {
-
-              document.removeEventListener('fullscreenchange', fullscreenchange);
-              document.removeEventListener('mozfullscreenchange', fullscreenchange);
-
-              element.requestPointerLock();
-            }
-
-          }
-
-          document.addEventListener('fullscreenchange', fullscreenchange, false);
-          document.addEventListener('mozfullscreenchange', fullscreenchange, false);
-
-          element.requestFullscreen = element.requestFullscreen || element.mozRequestFullscreen || element.mozRequestFullScreen || element.webkitRequestFullscreen;
-
-          element.requestFullscreen();
-
-        } else {
-
-          if (!debugControls) element.requestPointerLock();
-
-        }
-
-        cursor.activate();
-
-      }, false);
-
-    } else {
-
-      instructions.innerHTML = 'Your browser doesn\'t seem to support Pointer Lock API';
-
-    }
-
-  } // end requestPointerLock
+		}
 
 
   function onResize(event) {
@@ -302,12 +244,14 @@
       cursor.update();
     }
 
-    magnifier.update();
     if (timestamp && textCtrl) textCtrl.update(timestamp);
-    renderer.render(scene, camera);
+    grabCtrl.update(timestamp);
+
+    postprocessing.composer.render( 0.1 );
 
     // moved to bottom to allow frame dropping
     window.requestAnimationFrame(animate);
+
 
   }
 

@@ -29,7 +29,11 @@ var SphericalCursor = function (camera, scene) {
   camera.add(this.group);
 
   window.addEventListener("mousemove", this.onMouseMove.bind(this));
-  window.addEventListener("click", this.onClick.bind(this));
+  window.addEventListener("click", function () {
+    this._hoveredElements.map(function (mesh) {
+      this.bubbleEvent(mesh, 'click');
+    }.bind(this) )
+  }.bind(this) );
 };
 
 SphericalCursor.prototype = {
@@ -41,16 +45,14 @@ SphericalCursor.prototype = {
   },
 
 
-  onClick: function () {
-    console.log('click');
-    this._hoveredElements.map(function (mesh) {
-      mesh.dispatchEvent({type: 'click'})
-    });
+  bubbleEvent: function (mesh, type) {
+    var payload = {type: type, stopPropagation: false};
+    mesh.dispatchEvent(payload);
+    if (mesh.parent && !payload.stopPropagation) this.bubbleEvent(mesh.parent, type);
   },
 
   update: function () {
     if (!this.active) return;
-    // debugger
 
     this.group.position.copy(
       this.raycaster.ray.direction
@@ -64,10 +66,9 @@ SphericalCursor.prototype = {
 
     if (intersects.length > 0) {
       if (target != intersects[0].object) {
-        console.log('mouse over');
         this.currentTarget = target = intersects[0].object;
         this._hoveredElements.push(target);
-        target.dispatchEvent({type: 'mouseover', message: 'ok over'});
+        this.bubbleEvent(target, 'mouseover');
       }
     } else {
       if (target) {
@@ -76,10 +77,10 @@ SphericalCursor.prototype = {
         for (var i = 0; i < this._hoveredElements.length; i++) {
           if (this._hoveredElements[i] == target) {
             this._hoveredElements.splice(i, 1);
-            return
+            break
           }
         }
-        target.dispatchEvent({type: 'mouseout', message: 'ok out'});
+        this.bubbleEvent(target, 'mouseout');
       }
     }
 
@@ -87,6 +88,16 @@ SphericalCursor.prototype = {
 
   addObject: function (o) {
     this.clickable_objects.push(o);
+  },
+
+  removeObject: function (o) {
+    for (var i = 0; i < this.clickable_objects.length; i++){
+      if (this.clickable_objects[i] == o){
+        this.clickable_objects.splice(i,1);
+        return
+      }
+    }
+    throw "Object not in list"
   },
 
   activate: function () {

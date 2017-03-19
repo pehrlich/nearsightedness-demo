@@ -3,36 +3,49 @@ function Magnifier(scene, renderer) {
   this.scene = scene;
   this.renderer = renderer;
   var magInnerRadius = 0.3;
+  var magColor = 0xcccc00;
 
   this.texture = new THREE.WebGLRenderTarget(
-      256, 256, {
-        minFilter: THREE.LinearFilter,
-        magFilter: THREE.NearestFilter,
-        format: THREE.RGBFormat
-      } );
+    256, 256, {
+      minFilter: THREE.LinearFilter,
+      magFilter: THREE.NearestFilter,
+      format: THREE.RGBFormat
+    });
 
-  var planeMaterial = new THREE.MeshBasicMaterial({ map: this.texture });
+  this.mesh = new THREE.Mesh(
+    new THREE.CircleBufferGeometry(magInnerRadius, 64),
+    new THREE.MeshBasicMaterial({map: this.texture, side: THREE.DoubleSide})
+  );
+  this.mesh.name = "Lens";
 
-  this.mesh = new THREE.Mesh( new THREE.CircleBufferGeometry(magInnerRadius,64), planeMaterial);
+  var magMaterial = new THREE.MeshPhongMaterial({
+    color: magColor,
+    emissive: 0x999933,
+    side: THREE.DoubleSide,
+    shading: THREE.FlatShading
+  });
 
+  // , new THREE.MeshBasicMaterial( { color: 0xcccc00 } )
   var ring = new THREE.Mesh(
-    new THREE.RingBufferGeometry( magInnerRadius, magInnerRadius + 0.01, 32 )
-    , new THREE.MeshBasicMaterial( { color: 0xcccc00, side: THREE.DoubleSide } )
+    new THREE.TorusBufferGeometry(magInnerRadius + 0.01, 0.02, 32, 100),
+    magMaterial
   );
-  this.mesh.add( ring );
+  ring.name = "mag ring";
+  this.mesh.add(ring);
 
-  var cylinder = new THREE.Mesh(
-    new THREE.CylinderBufferGeometry( 0.05, 0.05, 0.3, 32 ),
-    new THREE.MeshBasicMaterial( {color: 0xcccc00} )
+  var handle = new THREE.Mesh(
+    new THREE.CylinderBufferGeometry(0.05, 0.05, 0.3, 32),
+    magMaterial
   );
-  cylinder.position.set(0.32, -0.32, 0);
-  cylinder.rotation.z = Math.PI / 4;
-  this.mesh.add( cylinder );
+  handle.position.set(0.32, -0.32, 0);
+  handle.rotation.z = Math.PI / 4;
+  handle.name = "mag handle";
+  this.mesh.add(handle);
 
   var crossHair = new THREE.Object3D();
 
   var crossHairMaterial = new THREE.MeshBasicMaterial(
-    { color: 0xbbbbbb }
+    {color: 0xbbbbbb}
   );
   var crossHairGeom = new THREE.PlaneBufferGeometry(0.008, 0.09);
 
@@ -58,13 +71,12 @@ function Magnifier(scene, renderer) {
   this.mesh.add(crossHair);
 
 
-
-  this.camera = new THREE.PerspectiveCamera( 45, 1, 1, 1000 );
-  this.camera.position.set(0,0,0);
+  this.camera = new THREE.PerspectiveCamera(45, 1, 1, 1000);
+  this.camera.position.set(0, 0, 0);
   this.camera.name = "magnifier camera";
   this.camera.zoom = 3;
   this.camera.updateProjectionMatrix();
-  this.mesh.add( this.camera );
+  this.mesh.add(this.camera);
 }
 
 Magnifier.prototype = {

@@ -93,6 +93,7 @@ TextCtrl.prototype = {
 
       segment.mesh = new THREE.Mesh(geometry, material);
       segment.mesh.userData.segment = segment;
+      segment.mesh.name = segment.string.slice(0,10) + '...';
       segment.mesh.addEventListener('mouseover', onTextMouseOver);
       segment.mesh.addEventListener('mouseout', onTextMouseOut);
       segment.mesh.addEventListener('click', onTextClick);
