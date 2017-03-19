@@ -32,8 +32,8 @@ var SphericalCursor = function (camera, scene) {
   window.addEventListener("click", function () {
     this._hoveredElements.map(function (mesh) {
       this.bubbleEvent(mesh, 'click');
-    }.bind(this) )
-  }.bind(this) );
+    }.bind(this))
+  }.bind(this));
 };
 
 SphericalCursor.prototype = {
@@ -66,6 +66,7 @@ SphericalCursor.prototype = {
 
     if (intersects.length > 0) {
       if (target != intersects[0].object) {
+        if (target) this._unHover(target);
         this.currentTarget = target = intersects[0].object;
         this._hoveredElements.push(target);
         this.bubbleEvent(target, 'mouseover');
@@ -74,16 +75,20 @@ SphericalCursor.prototype = {
       if (target) {
         this.currentTarget = null;
         // dispatch afterwards in case this causes an exception, we still have nulled our target
-        for (var i = 0; i < this._hoveredElements.length; i++) {
-          if (this._hoveredElements[i] == target) {
-            this._hoveredElements.splice(i, 1);
-            break
-          }
-        }
+        this._unHover(target);
         this.bubbleEvent(target, 'mouseout');
       }
     }
 
+  },
+
+  _unHover: function (o) {
+    for (var i = 0; i < this._hoveredElements.length; i++) {
+      if (this._hoveredElements[i] == o) {
+        this._hoveredElements.splice(i, 1);
+        break
+      }
+    }
   },
 
   addObject: function (o) {
@@ -91,9 +96,9 @@ SphericalCursor.prototype = {
   },
 
   removeObject: function (o) {
-    for (var i = 0; i < this.clickable_objects.length; i++){
-      if (this.clickable_objects[i] == o){
-        this.clickable_objects.splice(i,1);
+    for (var i = 0; i < this.clickable_objects.length; i++) {
+      if (this.clickable_objects[i] == o) {
+        this.clickable_objects.splice(i, 1);
         return
       }
     }
