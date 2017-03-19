@@ -26,7 +26,8 @@ TextCtrl.prototype = {
     this.segments = [
       {
         string: "My dear, let us hope it is not true; but, if it is true, ",
-        cameraPos: ['center', 1.03, -3]
+        cameraPos: ['center', 1.03, -3],
+        startPos: [0,0,0]
       },
       {
         string: "let us hope it will not become generally known.",
@@ -66,26 +67,39 @@ TextCtrl.prototype = {
 
       geometry.computeBoundingBox();
 
-      var xOffset;
+      // replace template:
       if (segment.cameraPos[0] == 'center') {
-        xOffset = -0.5 * ( geometry.boundingBox.max.x - geometry.boundingBox.min.x );
-      } else {
-        xOffset = segment.cameraPos[0];
+        segment.cameraPos[0] = -0.5 * ( geometry.boundingBox.max.x - geometry.boundingBox.min.x );
       }
 
       segment.mesh = new THREE.Mesh(geometry, material);
 
-      segment.mesh.position.set(
-        xOffset,
-        segment.cameraPos[1],
-        segment.cameraPos[2]
-      );
-      this.camera.add(segment.mesh);
-      segment.mesh.lookAt(this.camera);
+      if (segment.startPos){
+        segment.mesh.position.fromArray(segment.startPos);
+        this.scene.add(segment.mesh);
+        segment.mesh.lookAt(this.camera);
+      } else {
+        segment.mesh.position.set(
+          segment.cameraPos[0],
+          segment.cameraPos[1],
+          segment.cameraPos[2]
+        );
+        this.camera.add(segment.mesh);
+        segment.mesh.lookAt(this.camera);
+      }
+
     }
 
-    this.animate(0, new THREE.Vector3(0, 1, -3)).then(function () {
-      console.log('animation complete');
+    segment = this.segments[0];
+
+    var finalPosition = new THREE.Vector3().fromArray(segment.cameraPos);
+    this.camera.updateMatrixWorld( true );
+    finalPosition.applyMatrix4(this.camera.matrixWorld);
+
+    this.animate(0, finalPosition).then(function (segment) {
+      console.log('animation complete', segment);
+      THREE.SceneUtils.detach(segment.mesh, this.scene, this.camera);
+      segment.mesh.position.fromArray(segment.cameraPos);
     });
 
   },
@@ -94,7 +108,7 @@ TextCtrl.prototype = {
   animate: function (index, endPos) {
     var o = {
       startTime: performance.now(),
-      endTime: performance.now() + 2000,
+      endTime: performance.now() + 1000,
       target: this.segments[index],
       startPos: this.segments[index].mesh.position.clone(),
       endPos: endPos,
@@ -122,7 +136,7 @@ TextCtrl.prototype = {
       if (t > 1) {
         this.animations.splice(i, 1);
         i--;
-        animation.resolve();
+        animation.resolve(animation.target);
       } else {
         animation.target.mesh.position.set(0, 0, 0)
           .add(animation.endPos).sub(animation.startPos).multiplyScalar(t)
