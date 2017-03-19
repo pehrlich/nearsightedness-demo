@@ -6,13 +6,13 @@
 
 
 function TextCtrl(camera, scene, font) {
-  this.segments = [];
+  this._segments = [];
+  this._hoveredElements = [];
+  this._animations = [];
   this.camera = camera;
   this.scene = scene;
-  this.animations = [];
-
   this.font = font;
-  this._hoveredElements = [];
+
   this.createMeshes();
 
   window.addEventListener("click", this.onClick.bind(this));
@@ -26,7 +26,7 @@ TextCtrl.prototype = {
     });
   },
   createMeshes: function () {
-    this.segments = [
+    this._segments = [
       {
         string: "My dear, let us hope it is not true; but, if it is true, ",
         cameraPos: ['center', 1.03, -3],
@@ -68,14 +68,12 @@ TextCtrl.prototype = {
     };
 
     var onTextClick = function (event) {
-      console.log('text lick', event);
       var segment = this.userData.segment;
       var finalPosition = new THREE.Vector3().fromArray(segment.cameraPos);
       ctrl.camera.updateMatrixWorld(true);
       finalPosition.applyMatrix4(ctrl.camera.matrixWorld);
 
       ctrl.animate(0, finalPosition).then(function (segment) {
-        console.log('animation complete', segment);
         THREE.SceneUtils.detach(segment.mesh, this.scene, this.camera);
         segment.mesh.position.fromArray(segment.cameraPos);
       });
@@ -87,8 +85,8 @@ TextCtrl.prototype = {
     var curveSegments = 2;
     var segment, geometry, material;
 
-    for (var i = 0; i < this.segments.length; i++) {
-      segment = this.segments[i];
+    for (var i = 0; i < this._segments.length; i++) {
+      segment = this._segments[i];
       var geometryOptions = {
         font: this.font, size: size, height: height, curveSegments: curveSegments
       };
@@ -135,7 +133,7 @@ TextCtrl.prototype = {
   },
 
   meshes: function () {
-    return this.segments.map(function (segment) {
+    return this._segments.map(function (segment) {
       return segment.mesh
     })
   },
@@ -145,8 +143,8 @@ TextCtrl.prototype = {
     var o = {
       startTime: performance.now(),
       endTime: performance.now() + 1000,
-      target: this.segments[index],
-      startPos: this.segments[index].mesh.position.clone(),
+      target: this._segments[index],
+      startPos: this._segments[index].mesh.position.clone(),
       endPos: endPos,
       resolve: null,
       reject: null
@@ -157,7 +155,7 @@ TextCtrl.prototype = {
       o.reject = reject;
     });
 
-    this.animations.push(o);
+    this._animations.push(o);
     return p;
   },
 
@@ -165,12 +163,12 @@ TextCtrl.prototype = {
   update: function (timestamp) {
 
     var animation;
-    for (var i = 0; i < this.animations.length; i++) {
-      animation = this.animations[i];
+    for (var i = 0; i < this._animations.length; i++) {
+      animation = this._animations[i];
 
       var t = (timestamp - animation.startTime) / (animation.endTime - animation.startTime);
       if (t > 1) {
-        this.animations.splice(i, 1);
+        this._animations.splice(i, 1);
         i--;
         animation.resolve(animation.target);
       } else {
