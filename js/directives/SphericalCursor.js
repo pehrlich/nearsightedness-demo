@@ -2,11 +2,11 @@ var SphericalCursor = function (camera, scene) {
   'strict mode';
   this.camera = camera;
   this.scene = scene;
-  this.SENSITIVITY = 0.01;              // to adjust how sensitive the mouse control is
+  this.SENSITIVITY = 0.007;              // to adjust how sensitive the mouse control is
   this.DISTANCE_SCALE_FACTOR = -0.05;  // to scale down the cursor based on its collision distance
   this.DEFAULT_CURSOR_SCALE = 0.6;     // scale to set the cursor if no raycast hit is found
   this.MAX_DISTANCE = 100;             // maximum distance to raycast
-  this.SPHERE_DISTANCE = 2;           // sphere radius to project cursor onto if no raycast hit
+  this.SPHERE_DISTANCE = 4;           // sphere radius to project cursor onto if no raycast hit
   this.mouse = new THREE.Vector2();
   this.raycaster = new THREE.Raycaster();
   this.clickable_objects = [];
@@ -14,10 +14,12 @@ var SphericalCursor = function (camera, scene) {
   this.currentTarget = null;
   this._hoveredElements = [];
 
-  // todo: make brighter?
   var mesh = new THREE.Mesh(
     new THREE.SphereGeometry(0.05, 16, 16),
-    new THREE.MeshPhongMaterial({color: "#FFFFFF"})
+    new THREE.MeshPhongMaterial({
+      color: "#FFFFFF",
+      emissive: 0xaaaaaa
+    })
   );
   mesh.name = "cursor";
   mesh.material.depthTest = false;
@@ -54,20 +56,15 @@ SphericalCursor.prototype = {
   update: function () {
     if (!this.active) return;
 
-    this.group.position.copy(
-      this.raycaster.ray.direction
-    ).multiplyScalar(this.SPHERE_DISTANCE);
-
-    this.group.lookAt(this.raycaster.ray.direction);
-
 
     var intersects = this.raycaster.intersectObjects(this.clickable_objects, true);
-    var target = this.currentTarget;
+    var target = this.currentTarget && this.currentTarget.object;
 
     if (intersects.length > 0) {
       if (target != intersects[0].object) {
         if (target) this._unHover(target);
-        this.currentTarget = target = intersects[0].object;
+        this.currentTarget = intersects[0];
+        target = this.currentTarget.object;
         this._hoveredElements.push(target);
         this.bubbleEvent(target, 'mouseover');
       }
@@ -79,6 +76,15 @@ SphericalCursor.prototype = {
         this.bubbleEvent(target, 'mouseout');
       }
     }
+
+    var sphere_distance = this.SPHERE_DISTANCE;
+    if (this.currentTarget) sphere_distance = this.currentTarget.distance;
+
+    this.group.position.copy(
+      this.raycaster.ray.direction
+    ).multiplyScalar(sphere_distance);
+
+    this.group.lookAt(this.raycaster.ray.direction);
 
   },
 
