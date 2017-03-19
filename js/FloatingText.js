@@ -48,20 +48,20 @@ TextCtrl.prototype = {
       // }
     ];
 
-    var hoveredElements = this._hoveredElements;
+    var ctrl = this;
 
     var onTextMouseOver = function (event) {
       this.userData.origColor0 = this.material.materials[0].color.getHex();
       this.userData.origColor1 = this.material.materials[1].color.getHex();
       this.material.materials[0].color.setHex(0xf4f442);
-      hoveredElements.push(this);
+      ctrl._hoveredElements.push(this);
     };
 
     var onTextMouseOut = function (event) {
       this.material.materials[0].color.setHex(this.userData.origColor0);
-      for (var i = 0; i < hoveredElements.length; i++){
-        if (hoveredElements[i] == this) {
-          hoveredElements.splice(i,1)
+      for (var i = 0; i < ctrl._hoveredElements.length; i++){
+        if (ctrl._hoveredElements[i] == this) {
+          ctrl._hoveredElements.splice(i,1)
           return
         }
       }
@@ -69,6 +69,16 @@ TextCtrl.prototype = {
 
     var onTextClick = function (event) {
       console.log('text lick', event);
+      var segment = this.userData.segment;
+      var finalPosition = new THREE.Vector3().fromArray(segment.cameraPos);
+      ctrl.camera.updateMatrixWorld(true);
+      finalPosition.applyMatrix4(ctrl.camera.matrixWorld);
+
+      ctrl.animate(0, finalPosition).then(function (segment) {
+        console.log('animation complete', segment);
+        THREE.SceneUtils.detach(segment.mesh, this.scene, this.camera);
+        segment.mesh.position.fromArray(segment.cameraPos);
+      });
     };
 
 
@@ -100,6 +110,7 @@ TextCtrl.prototype = {
       }
 
       segment.mesh = new THREE.Mesh(geometry, material);
+      segment.mesh.userData.segment = segment;
       segment.mesh.addEventListener('mouseover', onTextMouseOver);
       segment.mesh.addEventListener('mouseout', onTextMouseOut);
       segment.mesh.addEventListener('click', onTextClick);
@@ -120,17 +131,6 @@ TextCtrl.prototype = {
 
     }
 
-    segment = this.segments[0];
-
-    var finalPosition = new THREE.Vector3().fromArray(segment.cameraPos);
-    this.camera.updateMatrixWorld(true);
-    finalPosition.applyMatrix4(this.camera.matrixWorld);
-
-    // this.animate(0, finalPosition).then(function (segment) {
-    //   console.log('animation complete', segment);
-    //   THREE.SceneUtils.detach(segment.mesh, this.scene, this.camera);
-    //   segment.mesh.position.fromArray(segment.cameraPos);
-    // });
 
   },
 
