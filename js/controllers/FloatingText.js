@@ -64,13 +64,21 @@ TextCtrl.prototype = {
       finalPosition.applyMatrix4(ctrl.camera.matrixWorld);
 
       ctrl.animate(segment.mesh, finalPosition).then(function (mesh) {
-        THREE.SceneUtils.detach(mesh, this.scene, this.camera);
+        THREE.SceneUtils.detach(mesh, ctrl.scene, ctrl.camera);
         mesh.position.fromArray(mesh.userData.segment.cameraPos);
-        this.numFound++;
-        if (this.numFoud === 4) {
-          console.log('all found');
+        ctrl.numFound++;
+        if (ctrl.numFound === 4) {
+          var signature = ctrl._createText(
+            "...Spoken in the 1880s, by the Bishop of Birmingham’s\n wife when she heard that Charles Darwin was claiming\n that human beings were descended from the apes.",
+            {}
+          );
+          signature.scale.multiplyScalar(0.8);
+          signature.position.set(-1,0.6,-3);
+          segment.mesh.lookAt(ctrl.camera);
+          ctrl.camera.add(signature);
         }
-      });
+      } );
+
     };
 
 
