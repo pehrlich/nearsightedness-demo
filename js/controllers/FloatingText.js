@@ -11,6 +11,7 @@ function TextCtrl(camera, scene, font) {
   this.camera = camera;
   this.scene = scene;
   this.font = font;
+  this.numFound = 0;
 
   this.createMeshes();
 }
@@ -19,24 +20,29 @@ TextCtrl.prototype = {
   createMeshes: function () {
     this._segments = [
       {
-        string: "My dear, let us hope it is not true; but, if it is true, ",
-        cameraPos: ['center', 1.03, -3],
-        startPos: [0, 0, 0]
+        string: "My dear, let us hope  ",
+        cameraPos: [-1.167, 1.03, -3],
+        startPos: [-0.8, 0.1, -0.4],
+        startScale: 0.7
+      },
+      {
+        string: "it is not true;",
+        cameraPos: [-0.15, 1.03, -3],
+        startPos: [-2, 0.6, -1.6],
+        startScale: 0.7
+      },
+      {
+        string: "but, if it is true,",
+        cameraPos: [0.47, 1.03, -3],
+        startPos: [2.3, 1.5, -2],
+        startScale: 0.7
       },
       {
         string: "let us hope it will not become generally known.",
-        cameraPos: ['center', 0.9, -3]
-      }//,
-      // {
-      //   string: "--Charles Darwin's friend, the wife ",
-      //   cameraPos: [0, 0.77, -3],
-      //   geometryOptions: {size: 0.05, height: 0.03}
-      // },
-      // {
-      //   string: "  of the Bishop of Birmingham, 1880s.",
-      //   cameraPos: [0, 0.67, -3],
-      //   geometryOptions: {size: 0.05, height: 0.03}
-      // }
+        cameraPos: ['center', 0.9, -3],
+        startPos: [-0.5, 0.5, -2.64],
+        startScale: 0.7
+      }
     ];
 
     var ctrl = this;
@@ -60,61 +66,69 @@ TextCtrl.prototype = {
       ctrl.animate(segment.mesh, finalPosition).then(function (mesh) {
         THREE.SceneUtils.detach(mesh, this.scene, this.camera);
         mesh.position.fromArray(mesh.userData.segment.cameraPos);
+        this.numFound++;
+        if (this.numFoud === 4) {
+          console.log('all found');
+        }
       });
     };
 
 
-    var size = 0.08;
-    var height = 0.07;
-    var curveSegments = 2;
-    var segment, geometry, material;
+    var segment;
 
     for (var i = 0; i < this._segments.length; i++) {
       segment = this._segments[i];
-      var geometryOptions = {
-        font: this.font, size: size, height: height, curveSegments: curveSegments
-      };
-      Object.assign(geometryOptions, segment.geometryOptions);
 
-      material = new THREE.MultiMaterial([
-        new THREE.MeshBasicMaterial({color: 0xffffff, overdraw: 0.5}),
-        new THREE.MeshBasicMaterial({color: 0x000000, overdraw: 0.5})
-      ]);
-
-      geometry = new THREE.TextGeometry(segment.string, geometryOptions);
-
-
-      geometry.computeBoundingBox();
+      segment.mesh = this._createText(segment.string, segment.geometryOptions);
+      segment.mesh.userData.segment = segment;
 
       // replace template:
       if (segment.cameraPos[0] == 'center') {
-        segment.cameraPos[0] = -0.5 * ( geometry.boundingBox.max.x - geometry.boundingBox.min.x );
+        segment.cameraPos[0] = -0.5 * ( segment.mesh.geometry.boundingBox.max.x - segment.mesh.geometry.boundingBox.min.x );
       }
 
-      segment.mesh = new THREE.Mesh(geometry, material);
-      segment.mesh.userData.segment = segment;
-      segment.mesh.name = segment.string.slice(0,10) + '...';
       segment.mesh.addEventListener('mouseover', onTextMouseOver);
       segment.mesh.addEventListener('mouseout', onTextMouseOut);
       segment.mesh.addEventListener('click', onTextClick);
+
+      if (segment.startScale) segment.mesh.scale.multiplyScalar(segment.startScale);
 
       if (segment.startPos) {
         segment.mesh.position.fromArray(segment.startPos);
         this.scene.add(segment.mesh);
         segment.mesh.lookAt(this.camera);
       } else {
-        segment.mesh.position.set(
-          segment.cameraPos[0],
-          segment.cameraPos[1],
-          segment.cameraPos[2]
-        );
+        segment.mesh.position.fromArray(segment.cameraPos);
         this.camera.add(segment.mesh);
         segment.mesh.lookAt(this.camera);
       }
 
     }
 
+  },
 
+  _createText: function (string, options) {
+    var size = 0.08;
+    var height = 0.07;
+    var curveSegments = 2;
+
+    var geometryOptions = {
+      font: this.font, size: size, height: height, curveSegments: curveSegments
+    };
+    Object.assign(geometryOptions, options);
+
+    var material = new THREE.MultiMaterial([
+      new THREE.MeshBasicMaterial({color: 0xffffff, overdraw: 0.5}),
+      new THREE.MeshBasicMaterial({color: 0x000000, overdraw: 0.5})
+    ]);
+
+    var geometry = new THREE.TextGeometry(string, geometryOptions);
+    geometry.computeBoundingBox();
+
+    var mesh = new THREE.Mesh(geometry, material);
+    mesh.name = string.slice(0, 10) + '...';
+
+    return mesh
   },
 
   meshes: function () {
@@ -160,6 +174,7 @@ TextCtrl.prototype = {
         animation.target.position.set(0, 0, 0)
           .add(animation.endPos).sub(animation.startPos).multiplyScalar(t)
           .add(animation.startPos);
+        animation.target.scale.set(1, 1, 1).multiplyScalar(t)
       }
     }
 
