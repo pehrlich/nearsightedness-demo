@@ -53,6 +53,12 @@
     initScene();
     loadModels();
 
+    (new THREE.FontLoader())
+        .load('https://threejs.org/examples/fonts/helvetiker_regular.typeface.json', function (font) {
+          textCtrl = new TextCtrl(camera, scene, font);
+          textCtrl.meshes().map(function (mesh) { cursor.addObject(mesh); });
+    });
+
   }
 
 
@@ -68,7 +74,7 @@
 
     }
 
-    cursor.addObject(furnitureGroup);
+//    cursor.addObject(furnitureGroup);
 
   }
 
@@ -179,8 +185,6 @@
     cursor.group.children[0].visible = false;
 
     cursor.group.add(magnifier.mesh);
-
-    textCtrl = new TextCtrl(camera, scene);
 
 
     if (debugControls) controls = new THREE.OrbitControls(camera, renderer.domElement);
@@ -299,7 +303,7 @@
     }
 
     magnifier.update();
-    if (timestamp) textCtrl.update(timestamp);
+    if (timestamp && textCtrl) textCtrl.update(timestamp);
     renderer.render(scene, camera);
 
     // moved to bottom to allow frame dropping

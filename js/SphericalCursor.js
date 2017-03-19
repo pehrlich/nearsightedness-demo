@@ -25,7 +25,6 @@ var SphericalCursor = function (camera, scene) {
   this.group.add(mesh);
 
   camera.add(this.group);
-  // this.group.add(camera);
 
 
   window.addEventListener("mousemove", this.onMouseMove.bind(this));
@@ -50,22 +49,20 @@ SphericalCursor.prototype = {
 
 
     var intersects = this.raycaster.intersectObjects(this.clickable_objects, true);
+    var target = this.currentTarget;
 
     if (intersects.length > 0) {
-      if (this.currentTarget != intersects[0].object) {
-        if (this.currentTarget) this.currentTarget.material.emissive.setHex(this.currentTarget.currentHex);
-        this.currentTarget = intersects[0].object;
-        this.currentTarget.userData.origColor = this.currentTarget.material.emissive.getHex();
-        this.currentTarget.material.emissive.setHex(0xff0000);
-        // todo: emit mouseover
+      if (target != intersects[0].object) {
+        if (target) target.material.emissive.setHex(target.currentHex);
+        target = intersects[0].object;
+        target.dispatchEvent({type: 'mouseover', message: 'ok over'});
       }
     } else {
-      if (this.currentTarget) {
-        this.currentTarget.material.emissive.setHex(this.currentTarget.currentHex);
+      if (target) {
         this.currentTarget = null;
-        // todo: emit mouseout
+        // dispatch afterwards in case this causes an exception, we still have nulled our target
+        target.dispatchEvent({type: 'mouseout', message: 'ok out'});
       }
-      this.currentTarget = null;
     }
 
   },

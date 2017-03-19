@@ -5,19 +5,14 @@
 // when it is "clicked", it will be restored.
 
 
-function TextCtrl(camera, scene, segments) {
-
+function TextCtrl(camera, scene, font) {
+  this.segments = [];
   this.camera = camera;
   this.scene = scene;
-  this.meshes = [];
   this.animations = [];
 
-  var loader = new THREE.FontLoader();
-
-  loader.load('https://threejs.org/examples/fonts/helvetiker_regular.typeface.json', function (font) {
-    this.font = font;
-    this.createMeshes();
-  }.bind(this));
+  this.font = font;
+  this.createMeshes();
 
 }
 
@@ -73,6 +68,13 @@ TextCtrl.prototype = {
       }
 
       segment.mesh = new THREE.Mesh(geometry, material);
+      segment.mesh.addEventListener('mouseover', function (event) {
+        console.log('mouseover', event);
+      });
+
+      segment.mesh.addEventListener('mouseout', function (event) {
+        console.log('mouseout', event);
+      });
 
       if (segment.startPos){
         segment.mesh.position.fromArray(segment.startPos);
@@ -96,12 +98,16 @@ TextCtrl.prototype = {
     this.camera.updateMatrixWorld( true );
     finalPosition.applyMatrix4(this.camera.matrixWorld);
 
-    this.animate(0, finalPosition).then(function (segment) {
-      console.log('animation complete', segment);
-      THREE.SceneUtils.detach(segment.mesh, this.scene, this.camera);
-      segment.mesh.position.fromArray(segment.cameraPos);
-    });
+    // this.animate(0, finalPosition).then(function (segment) {
+    //   console.log('animation complete', segment);
+    //   THREE.SceneUtils.detach(segment.mesh, this.scene, this.camera);
+    //   segment.mesh.position.fromArray(segment.cameraPos);
+    // });
 
+  },
+
+  meshes: function () {
+    return this.segments.map(function (segment) { return segment.mesh })
   },
 
   // fixed duration of 1s
