@@ -2,6 +2,9 @@
  
 This small art-piece gives some perspective on human nature.  
 Once you begin, select the words to reveal a surprise.
+
+ -- **[Click To Play](https://pehrlich.github.io/nearsightedness-demo/)** --
+
  
  
 ## Technical Notes
@@ -31,3 +34,22 @@ There's a lot of code here, so I may point out a few places which are particular
    for the bokeh shader.  The PointerLock has been moved out to directives, but more remains in this
    file to be modularized.
        
+
+
+### Up Next
+
+_Loose ends_ - there some pieces of polish which have been omitted due to time constraints:
+ - There are no tests, sadly.  Ideally each controller and each directive would have its own.
+ - The Pointer Lock management is not ideal.  It would be better if the cursor would't move outside
+   of the edges of the camera FoV, and if when "clicking to begin", the 3d cursor appeared directly
+   beneath the 2d one.
+ - After letters have been clicked on, it is still possible to click on them again and replay the animation. 
+   This should be disabled.
+
+_Roadmap_:     
+ - It would be nice to be able to put down the magnifying glass with a click, to make a less constrained feel
+ - Other tools could be grabbed, such as a "look around" control
+ - An exploration in Physically-based rendering could be really fun
+ 
+ 
+Quote Attribution: http://quoteinvestigator.com/2011/02/09/darwinism-hope-pray/ 
