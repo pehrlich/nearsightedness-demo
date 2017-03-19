@@ -22,7 +22,7 @@ TextCtrl.prototype = {
       {
         string: "My dear, let us hope it is not true; but, if it is true, ",
         cameraPos: ['center', 1.03, -3],
-        startPos: [0,0,0]
+        startPos: [0, 0, 0]
       },
       {
         string: "let us hope it will not become generally known.",
@@ -40,16 +40,21 @@ TextCtrl.prototype = {
       // }
     ];
 
-    var material = new THREE.MultiMaterial([
-      new THREE.MeshBasicMaterial({color: 0xffffff, overdraw: 0.5}),
-      new THREE.MeshBasicMaterial({color: 0x000000, overdraw: 0.5})
-    ]);
+    var onTextMouseOver = function (event) {
+      this.userData.origColor0 = this.material.materials[0].color.getHex();
+      this.userData.origColor1 = this.material.materials[1].color.getHex();
+      this.material.materials[0].color.setHex(0xf4f442);
+    };
+
+    var onTextMouseOut = function (event) {
+      this.material.materials[0].color.setHex(this.userData.origColor0);
+    };
 
 
     var size = 0.08;
     var height = 0.07;
     var curveSegments = 2;
-    var segment;
+    var segment, geometry, material;
 
     for (var i = 0; i < this.segments.length; i++) {
       segment = this.segments[i];
@@ -58,7 +63,13 @@ TextCtrl.prototype = {
       };
       Object.assign(geometryOptions, segment.geometryOptions);
 
-      var geometry = new THREE.TextGeometry(segment.string, geometryOptions);
+      material = new THREE.MultiMaterial([
+        new THREE.MeshBasicMaterial({color: 0xffffff, overdraw: 0.5}),
+        new THREE.MeshBasicMaterial({color: 0x000000, overdraw: 0.5})
+      ]);
+
+      geometry = new THREE.TextGeometry(segment.string, geometryOptions);
+
 
       geometry.computeBoundingBox();
 
@@ -68,15 +79,10 @@ TextCtrl.prototype = {
       }
 
       segment.mesh = new THREE.Mesh(geometry, material);
-      segment.mesh.addEventListener('mouseover', function (event) {
-        console.log('mouseover', event);
-      });
+      segment.mesh.addEventListener('mouseover', onTextMouseOver);
+      segment.mesh.addEventListener('mouseout', onTextMouseOut);
 
-      segment.mesh.addEventListener('mouseout', function (event) {
-        console.log('mouseout', event);
-      });
-
-      if (segment.startPos){
+      if (segment.startPos) {
         segment.mesh.position.fromArray(segment.startPos);
         this.scene.add(segment.mesh);
         segment.mesh.lookAt(this.camera);
@@ -95,7 +101,7 @@ TextCtrl.prototype = {
     segment = this.segments[0];
 
     var finalPosition = new THREE.Vector3().fromArray(segment.cameraPos);
-    this.camera.updateMatrixWorld( true );
+    this.camera.updateMatrixWorld(true);
     finalPosition.applyMatrix4(this.camera.matrixWorld);
 
     // this.animate(0, finalPosition).then(function (segment) {
@@ -107,7 +113,9 @@ TextCtrl.prototype = {
   },
 
   meshes: function () {
-    return this.segments.map(function (segment) { return segment.mesh })
+    return this.segments.map(function (segment) {
+      return segment.mesh
+    })
   },
 
   // fixed duration of 1s
