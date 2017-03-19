@@ -184,14 +184,7 @@
     floor.name = "floor";
     scene.add(floor);
 
-    // ceiling
-    var ceiling = new THREE.Mesh(
-        new THREE.BoxGeometry(50, 0.01, 50),
-        new THREE.MeshPhongMaterial({color: "#FFFFFF"})
-    );
-
     cursor = new SphericalCursor(camera, scene);
-    // todo
     floor.renderOrder = 0;
     cursor.group.renderOrder = 1;
 
@@ -200,7 +193,7 @@
   }
 
 
-  // from (todo)
+  // via https://threejs.org/examples/webgl_postprocessing_dof.html
   function initPostprocessing() {
 			var renderPass = new THREE.RenderPass( scene, camera );
 
