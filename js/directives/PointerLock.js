@@ -19,6 +19,7 @@ function requestPointerLock() {
         blocker.style.display = 'none';
 
         cursor.activate();
+        console.log('activate');
 
       } else {
 
@@ -29,6 +30,7 @@ function requestPointerLock() {
         instructions.style.display = '';
 
         cursor.deactivate();
+        console.log('deactivate');
 
       }
 

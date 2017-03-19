@@ -7,24 +7,15 @@
 
 function TextCtrl(camera, scene, font) {
   this._segments = [];
-  this._hoveredElements = [];
   this._animations = [];
   this.camera = camera;
   this.scene = scene;
   this.font = font;
 
   this.createMeshes();
-
-  window.addEventListener("click", this.onClick.bind(this));
-
 }
 
 TextCtrl.prototype = {
-  onClick: function () {
-    this._hoveredElements.map(function (mesh) {
-      mesh.dispatchEvent({type: 'click' })
-    });
-  },
   createMeshes: function () {
     this._segments = [
       {
@@ -54,17 +45,10 @@ TextCtrl.prototype = {
       this.userData.origColor0 = this.material.materials[0].color.getHex();
       this.userData.origColor1 = this.material.materials[1].color.getHex();
       this.material.materials[0].color.setHex(0xf4f442);
-      ctrl._hoveredElements.push(this);
     };
 
     var onTextMouseOut = function (event) {
       this.material.materials[0].color.setHex(this.userData.origColor0);
-      for (var i = 0; i < ctrl._hoveredElements.length; i++){
-        if (ctrl._hoveredElements[i] == this) {
-          ctrl._hoveredElements.splice(i,1)
-          return
-        }
-      }
     };
 
     var onTextClick = function (event) {

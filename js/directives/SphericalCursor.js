@@ -12,9 +12,11 @@ var SphericalCursor = function (camera, scene) {
   this.clickable_objects = [];
   this.active = false;
   this.currentTarget = null;
+  this._hoveredElements = [];
 
+  // todo: make brighter?
   var mesh = new THREE.Mesh(
-    new THREE.SphereGeometry(0.1, 16, 16),
+    new THREE.SphereGeometry(0.05, 16, 16),
     new THREE.MeshPhongMaterial({color: "#FFFFFF"})
   );
   mesh.name = "cursor";
@@ -27,6 +29,7 @@ var SphericalCursor = function (camera, scene) {
   camera.add(this.group);
 
   window.addEventListener("mousemove", this.onMouseMove.bind(this));
+  window.addEventListener("click", this.onClick.bind(this));
 };
 
 SphericalCursor.prototype = {
@@ -37,8 +40,17 @@ SphericalCursor.prototype = {
     this.raycaster.setFromCamera(this.mouse, this.camera);
   },
 
+
+  onClick: function () {
+    console.log('click');
+    this._hoveredElements.map(function (mesh) {
+      mesh.dispatchEvent({type: 'click'})
+    });
+  },
+
   update: function () {
     if (!this.active) return;
+    // debugger
 
     this.group.position.copy(
       this.raycaster.ray.direction
@@ -52,13 +64,21 @@ SphericalCursor.prototype = {
 
     if (intersects.length > 0) {
       if (target != intersects[0].object) {
+        console.log('mouse over');
         this.currentTarget = target = intersects[0].object;
+        this._hoveredElements.push(target);
         target.dispatchEvent({type: 'mouseover', message: 'ok over'});
       }
     } else {
       if (target) {
         this.currentTarget = null;
         // dispatch afterwards in case this causes an exception, we still have nulled our target
+        for (var i = 0; i < this._hoveredElements.length; i++) {
+          if (this._hoveredElements[i] == target) {
+            this._hoveredElements.splice(i, 1);
+            return
+          }
+        }
         target.dispatchEvent({type: 'mouseout', message: 'ok out'});
       }
     }
