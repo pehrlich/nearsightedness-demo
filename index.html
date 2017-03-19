@@ -24,7 +24,7 @@
   <script src="js/directives/PointerLock.js"></script>
   <script src="js/directives/SphericalCursor.js"></script>
   <script src="js/directives/Magnifier.js"></script>
-  <script src="js/controllers/FloatingText.js"></script>
+  <script src="js/controllers/TextCtrl.js"></script>
   <script src="js/controllers/GrabCtrl.js"></script>
 </head>
 <body>
@@ -155,6 +155,7 @@
     var ambientLight = new THREE.AmbientLight(0x404040); // soft white
     ambientLight.name = "ambientLight";
     scene.add(ambientLight);
+
     var intensity = 1.0;
     var distance = 0;
     var pointLight = new THREE.PointLight(0xcccc99, intensity, distance);
@@ -236,12 +237,12 @@
     if (timestamp && textCtrl) textCtrl.update(timestamp);
     grabCtrl.update(timestamp);
 
+    // toggle these two lines to turn off foggy vision
     postprocessing.composer.render( 0.1 );
 //    renderer.render(scene, camera);
 
     // moved to bottom to permit frame dropping
     window.requestAnimationFrame(animate);
-
 
   }
 

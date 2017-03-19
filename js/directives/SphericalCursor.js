@@ -2,7 +2,7 @@ var SphericalCursor = function (camera, scene) {
   'strict mode';
   this.camera = camera;
   this.scene = scene;
-  this.SENSITIVITY = 0.007;              // to adjust how sensitive the mouse control is
+  this.SENSITIVITY = 0.006;              // to adjust how sensitive the mouse control is
   this.DISTANCE_SCALE_FACTOR = -0.05;  // to scale down the cursor based on its collision distance
   this.DEFAULT_CURSOR_SCALE = 0.6;     // scale to set the cursor if no raycast hit is found
   this.MAX_DISTANCE = 100;             // maximum distance to raycast

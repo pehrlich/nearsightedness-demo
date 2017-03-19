@@ -1,10 +1,3 @@
-// holds text at the top of the scene attached to the camera
-// holds a list of stings
-// by default, each string is held in order at the top of the screen
-// each string can be given an optional coordinate in world space, and scale, to start at
-// when it is "clicked", it will be restored.
-
-
 function TextCtrl(camera, scene, font) {
   this._segments = [];
   this._animations = [];
@@ -182,11 +175,11 @@ TextCtrl.prototype = {
         animation.target.position.set(0, 0, 0)
           .add(animation.endPos).sub(animation.startPos).multiplyScalar(t)
           .add(animation.startPos);
-        animation.target.scale.set(1, 1, 1).multiplyScalar(t)
+        animation.target.scale.set(1, 1, 1).multiplyScalar(t);
       }
     }
 
   }
 
 
-}
+};

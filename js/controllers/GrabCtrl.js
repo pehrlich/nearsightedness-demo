@@ -1,6 +1,5 @@
 // has a magnifying lens, which glows and the user can pick up
 
-
 function GrabCtrl(cursor, scene, camera, renderer) {
   this.cursor = cursor;
   this.scene = scene;
@@ -48,7 +47,7 @@ GrabCtrl.prototype = {
 
   update: function (timestamp) {
     if (!this.magGrabbed) {
-      this.magnifier.mesh.rotation.y += 0.005;
+      this.magnifier.mesh.rotation.y -= 0.005;
     }
     this.magnifier.update();
   }
