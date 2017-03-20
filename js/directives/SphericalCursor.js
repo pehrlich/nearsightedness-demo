@@ -3,12 +3,13 @@ var SphericalCursor = function (camera, scene) {
   this.camera = camera;
   this.scene = scene;
   this.SENSITIVITY = 0.006;              // to adjust how sensitive the mouse control is
-  this.DISTANCE_SCALE_FACTOR = -0.05;  // to scale down the cursor based on its collision distance
-  this.DEFAULT_CURSOR_SCALE = 0.6;     // scale to set the cursor if no raycast hit is found
+  this.DISTANCE_SCALE_FACTOR = -0.8;  // to scale down the cursor based on its collision distance
+  this.DEFAULT_CURSOR_SCALE = 0.5;     // scale to set the cursor if no raycast hit is found
   this.MAX_DISTANCE = 100;             // maximum distance to raycast
   this.SPHERE_DISTANCE = 4;           // sphere radius to project cursor onto if no raycast hit
   this.mouse = new THREE.Vector2();
   this.raycaster = new THREE.Raycaster();
+  this.raycaster.far = this.MAX_DISTANCE;
   this.clickable_objects = [];
   this.active = false;
   this.currentTarget = null;
@@ -91,10 +92,12 @@ SphericalCursor.prototype = {
       this.raycaster.ray.direction
     ).multiplyScalar(sphere_distance);
 
-
-
-    this.group.scale.set(1,1,1);
-    if (this.autoScale) this.group.scale.multiplyScalar((sphere_distance * this.DISTANCE_SCALE_FACTOR + 1.0) / 2.0);
+    this.group.scale.set(1, 1, 1);
+    if (this.autoScale) {
+      var scale = this.DEFAULT_CURSOR_SCALE;
+      if (this.currentTarget) scale = (sphere_distance * this.DISTANCE_SCALE_FACTOR + 1.0) / 2.0;
+      this.group.scale.multiplyScalar(scale);
+    }
 
     this.group.lookAt(this.raycaster.ray.direction);
 
