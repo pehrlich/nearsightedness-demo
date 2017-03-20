@@ -52,6 +52,7 @@ _Loose ends_ - there some pieces of polish which have been omitted due to time c
  - When hovering over the final text with the magnifier, some of it will be self-shadowed by the magnifier camera.
  - Because we're casting a single ray from the cursor for the magnifying glass, it becomes a bit tricky to click on 
    objects.  It would be better if was cast a few different rays at very slight angles, or do some other cone-intersection-detection.
+ - The blur affect is notably lower quality on Windows machines, particular around the final text.
 
 _Roadmap_:     
  - It would be nice to be able to put down the magnifying glass with a click, to make a less constrained feel

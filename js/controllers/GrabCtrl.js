@@ -33,7 +33,7 @@ GrabCtrl.prototype = {
   onMagClick: function (event) {
     this.magGrabbed = true;
     this.cursor.group.children[0].visible = false;
-    this.cursor.SENSITIVITY = 0.003;
+    this.cursor.SENSITIVITY = 0.002;
     this.cursor.SPHERE_DISTANCE = 2;
     this.cursor.autoScale = false;
 
