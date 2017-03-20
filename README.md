@@ -45,6 +45,7 @@ _Loose ends_ - there some pieces of polish which have been omitted due to time c
    beneath the 2d one.
  - After letters have been clicked on, it is still possible to click on them again and replay the animation. 
    This should be disabled.
+ - When hovering over the final text with the magnifier, some of it will be self-shadowed by the magnifier camera.
 
 _Roadmap_:     
  - It would be nice to be able to put down the magnifying glass with a click, to make a less constrained feel
