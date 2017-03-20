@@ -35,6 +35,7 @@ GrabCtrl.prototype = {
     this.cursor.group.children[0].visible = false;
     this.cursor.SENSITIVITY = 0.002;
     this.cursor.SPHERE_DISTANCE = 2;
+    this.cursor.raycaster.far = 20;
     this.cursor.autoScale = false;
 
     THREE.SceneUtils.detach(this.magnifier.mesh, this.scene, this.cursor.group);
